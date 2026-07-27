@@ -3,39 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigation Menu</title>
+    <title>Practice Makes Perfect</title>
     <style>
-        /* Basic modern navigation styling */
-        nav {
-            background-color: #1a1a1a;
-            padding: 1rem;
+        /* Base page reset & styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0f172a;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             display: flex;
-            gap: 1.5rem;
-            border-radius: 8px;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 5rem;
+            overflow-x: hidden;
         }
 
+        /* Subtle glowing background ambient light */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(15, 23, 42, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Hero / Header Container */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        /* Main Animated Gradient Title */
+        .page-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            text-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Glassmorphism Floating Nav Container */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.8rem;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px; /* Pill shape */
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.3),
+                0 8px 10px -6px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Modernized Link Style */
         nav a {
-            color: #ffffff;
+            position: relative;
+            color: #94a3b8;
             text-decoration: none;
-            font-family: system-ui, sans-serif;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 0.6rem 1.4rem;
+            border-radius: 9999px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
         }
 
+        /* Glowing hover background */
+        nav a::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            opacity: 0;
+            transform: scale(0.85);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Hover & Focus states */
         nav a:hover {
-            background-color: #333333;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        nav a:hover::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        nav a:active {
+            transform: translateY(0) scale(0.97);
         }
     </style>
 </head>
 <body>
 
     <header>
+        <h1 class="page-title">Practice Makes Perfect</h1>
         <nav>
-            <a href="s18.html">S13</a>
-            <a href="s19.html">Games</a>
-         
+            <a href="s18.html">S18</a>
+            <a href="s19.html">S19</a>
         </nav>
     </header>
 
