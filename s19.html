@@ -8,32 +8,32 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#100b04;
-    --bg-2:#1a1206;
-    --panel:#201608;
-    --panel-2:#2b1e0d;
-    --trace:#3d2b12;
-    --copper:#c9954a;
-    --copper-dim:#7a5f2f;
-    --gold:#f6c04c;
-    --led:#ffd873;
-    --led-dim:#5c4413;
-    --led-red:#ff5c5c;
-    --led-red-dim:#5c1c1c;
-    --green-led:#5dffa0;
-    --green-led-dim:#1c5c3c;
-    --cyan:#ffb454;
-    --text:#f8f0dc;
-    --text-dim:#c7ad7c;
-    --text-faint:#7a6640;
+    --bg:#0a1628;
+    --bg-2:#0e1e38;
+    --panel:#102544;
+    --panel-2:#132c52;
+    --trace:#213e63;
+    --copper:#5ac8fa;
+    --copper-dim:#2c4f6e;
+    --gold:#3dffa0;
+    --led:#3dffa0;
+    --led-dim:#175c3e;
+    --led-red:#ff5d6c;
+    --led-red-dim:#5c1c22;
+    --green-led:#3dffa0;
+    --green-led-dim:#175c3e;
+    --cyan:#ffc145;
+    --text:#eaf2ff;
+    --text-dim:#93a9c7;
+    --text-faint:#5a7291;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
     margin:0;
     background:
-      radial-gradient(circle at 15% 0%, #241a08 0%, transparent 45%),
-      radial-gradient(circle at 85% 20%, #241a08 0%, transparent 40%),
+      radial-gradient(circle at 15% 0%, #10254a 0%, transparent 45%),
+      radial-gradient(circle at 85% 20%, #0f2a3f 0%, transparent 40%),
       var(--bg);
     color:var(--text);
     font-family:'Inter',sans-serif;
@@ -87,11 +87,11 @@
   .bulb{
     width:16px; height:16px; border-radius:50%;
     background:radial-gradient(circle at 35% 30%, #2a3d34, var(--led-dim));
-    border:1px solid #150e05; transition:.4s;
+    border:1px solid #0b1a2c; transition:.4s;
   }
   .bulb.on{
-    background:radial-gradient(circle at 35% 30%, #fff3d4, var(--led));
-    box-shadow:0 0 12px 3px rgba(246,192,76,.65), 0 0 2px #fff;
+    background:radial-gradient(circle at 35% 30%, #dcfff0, var(--led));
+    box-shadow:0 0 12px 3px rgba(61,255,160,.65), 0 0 2px #fff;
   }
   .rail-label{font-size:9px; letter-spacing:.08em; color:var(--text-faint); text-transform:uppercase;}
   .rail-label.on{color:var(--led);}
@@ -133,7 +133,7 @@
     padding:20px 16px; text-align:center; cursor:pointer; transition:.25s; position:relative;
   }
   .cycle-node:hover{border-color:var(--copper); transform:translateY(-3px);}
-  .cycle-node.active{border-color:var(--led); box-shadow:0 0 0 1px var(--led), 0 0 18px rgba(246,192,76,.25); background:#2e2109;}
+  .cycle-node.active{border-color:var(--led); box-shadow:0 0 0 1px var(--led), 0 0 18px rgba(61,255,160,.25); background:#123a2c;}
   .cycle-node .ico{font-size:28px; margin-bottom:8px; display:block;}
   .cycle-node .lbl{font-family:'JetBrains Mono',monospace; font-weight:700; letter-spacing:.1em; font-size:14px;}
   .cycle-arrow{align-self:center; color:var(--copper); font-size:22px; padding:0 2px;}
@@ -215,24 +215,24 @@
   }
   .esp .chip-name{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--copper); letter-spacing:.05em;}
   .esp .state{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);}
-  .esp.thinking{border-color:var(--gold); box-shadow:0 0 14px rgba(240,184,61,.4);}
+  .esp.thinking{border-color:var(--gold); box-shadow:0 0 14px rgba(61,255,160,.4);}
   .led-bulb{
     width:46px; height:46px; border-radius:50%; margin:0 auto;
-    background:radial-gradient(circle at 35% 30%, #3a2a10, #241a08);
+    background:radial-gradient(circle at 35% 30%, #1a3554, #102544);
     border:2px solid var(--copper-dim); transition:.2s;
   }
   .led-bulb.lit{
-    background:radial-gradient(circle at 35% 30%, #fff6d9, var(--gold));
-    box-shadow:0 0 22px 6px rgba(240,184,61,.7);
+    background:radial-gradient(circle at 35% 30%, #dcfff0, var(--gold));
+    box-shadow:0 0 22px 6px rgba(61,255,160,.7);
     border-color:var(--gold);
   }
   .code-panel{
-    background:#0d0904; border:1px solid var(--trace); border-radius:10px; padding:16px 18px; margin-top:24px;
-    font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.7; color:#e8c179; overflow-x:auto;
+    background:#081428; border:1px solid var(--trace); border-radius:10px; padding:16px 18px; margin-top:24px;
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.7; color:#7fe0a8; overflow-x:auto;
   }
   .code-panel .c1{color:var(--text-faint);}
   .code-panel .kw{color:var(--cyan);}
-  .code-panel .active-line{background:rgba(240,184,61,.12); display:block; margin:0 -18px; padding:0 18px; border-left:2px solid var(--gold);}
+  .code-panel .active-line{background:rgba(61,255,160,.12); display:block; margin:0 -18px; padding:0 18px; border-left:2px solid var(--gold);}
 
   /* ---------- quiz ---------- */
   .quiz-progress{display:flex; gap:5px; margin-bottom:22px;}
@@ -287,13 +287,13 @@
   /* physical traffic light housing */
   .tl-scene{display:flex; align-items:center; justify-content:center; gap:36px; margin:28px 0 6px; flex-wrap:wrap;}
   .tl-housing{
-    width:76px; background:#180f05; border:3px solid var(--copper-dim); border-radius:14px;
+    width:76px; background:#0c1c30; border:3px solid var(--copper-dim); border-radius:14px;
     padding:16px 10px; display:flex; flex-direction:column; gap:14px; align-items:center;
   }
-  .tl-bulb{width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #2a2010, #170f06); border:2px solid #000; transition:.25s;}
-  .tl-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c2, var(--led-red)); box-shadow:0 0 18px 5px rgba(255,92,92,.65);}
-  .tl-bulb.yellow.on{background:radial-gradient(circle at 35% 30%, #fff2b0, #ffd23d); box-shadow:0 0 18px 5px rgba(255,210,61,.65);}
-  .tl-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 18px 5px rgba(93,255,160,.65);}
+  .tl-bulb{width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #1a3554, #0c1c30); border:2px solid #000; transition:.25s;}
+  .tl-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c8, var(--led-red)); box-shadow:0 0 18px 5px rgba(255,93,108,.65);}
+  .tl-bulb.yellow.on{background:radial-gradient(circle at 35% 30%, #fff2b0, #ffc145); box-shadow:0 0 18px 5px rgba(255,193,69,.65);}
+  .tl-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 18px 5px rgba(61,255,160,.65);}
   .tl-info{max-width:220px;}
   .tl-info .state-line{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--gold); margin-bottom:8px; min-height:18px;}
   .tl-info .desc-line{font-size:13.5px; color:var(--text-dim); line-height:1.55; min-height:40px;}
@@ -303,10 +303,10 @@
   .px-unit{text-align:center;}
   .px-bulb{
     width:56px; height:56px; border-radius:50%; margin:0 auto 10px;
-    background:radial-gradient(circle at 35% 30%, #241a08, #150e04); border:2px solid var(--copper-dim); transition:.25s;
+    background:radial-gradient(circle at 35% 30%, #1a3554, #0c1c30); border:2px solid var(--copper-dim); transition:.25s;
   }
-  .px-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c2, var(--led-red)); box-shadow:0 0 20px 6px rgba(255,92,92,.6);}
-  .px-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 20px 6px rgba(93,255,160,.6);}
+  .px-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c8, var(--led-red)); box-shadow:0 0 20px 6px rgba(255,93,108,.6);}
+  .px-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 20px 6px rgba(61,255,160,.6);}
   .px-label{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em; color:var(--text-faint); text-transform:uppercase;}
   .px-state-badge{
     text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--gold);
@@ -334,7 +334,7 @@
   /* ---------- sticky tab navigation ---------- */
   .tabnav{
     position:sticky; top:0; z-index:50;
-    background:rgba(16,11,4,.94); backdrop-filter:blur(6px);
+    background:rgba(10,22,40,.94); backdrop-filter:blur(6px);
     border-bottom:1px solid var(--trace); border-radius:0 0 10px 10px;
   }
   .tabnav-inner{
