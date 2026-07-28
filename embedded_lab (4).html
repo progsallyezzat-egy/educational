@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embedded Systems Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#100b04;
+    --bg-2:#1a1206;
+    --panel:#201608;
+    --panel-2:#2b1e0d;
+    --trace:#3d2b12;
+    --copper:#c9954a;
+    --copper-dim:#7a5f2f;
+    --gold:#f6c04c;
+    --led:#ffd873;
+    --led-dim:#5c4413;
+    --led-red:#ff5c5c;
+    --led-red-dim:#5c1c1c;
+    --green-led:#5dffa0;
+    --green-led-dim:#1c5c3c;
+    --cyan:#ffb454;
+    --text:#f8f0dc;
+    --text-dim:#c7ad7c;
+    --text-faint:#7a6640;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, #241a08 0%, transparent 45%),
+      radial-gradient(circle at 85% 20%, #241a08 0%, transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--gold);color:#0a1512;}
+
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  a{color:var(--cyan);}
+
+  /* ---------- circuit trace background pattern ---------- */
+  .trace-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.35;
+    background-image:
+      linear-gradient(var(--trace) 1px, transparent 1px),
+      linear-gradient(90deg, var(--trace) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(circle at 50% 20%, black, transparent 75%);
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1000px; margin:0 auto; padding:0 20px 120px;}
+
+  /* ---------- header / breadboard progress rail ---------- */
+  header{padding:36px 0 18px; text-align:center;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.35em;
+    color:var(--copper); text-transform:uppercase; margin-bottom:14px;
+  }
+  h1.title{
+    font-size:clamp(32px,6vw,58px); line-height:1.02; margin:0 0 10px;
+    text-transform:uppercase; letter-spacing:-.01em; font-weight:800;
+    background:linear-gradient(180deg,#fff, #b9e6cd 65%, var(--led) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{color:var(--text-dim); font-size:15px; max-width:560px; margin:0 auto 30px; line-height:1.55;}
+
+  .rail{
+    display:flex; align-items:center; justify-content:center; gap:0;
+    background:var(--panel); border:1px solid var(--trace); border-radius:10px;
+    padding:14px 18px; max-width:640px; margin:0 auto; position:relative;
+  }
+  .rail::before{
+    content:'';position:absolute; left:18px; right:18px; top:50%; height:2px;
+    background:var(--copper-dim); z-index:0; transform:translateY(-1px);
+  }
+  .rail-led{
+    position:relative; z-index:1; flex:1; display:flex; flex-direction:column; align-items:center; gap:7px;
+  }
+  .bulb{
+    width:16px; height:16px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #2a3d34, var(--led-dim));
+    border:1px solid #150e05; transition:.4s;
+  }
+  .bulb.on{
+    background:radial-gradient(circle at 35% 30%, #fff3d4, var(--led));
+    box-shadow:0 0 12px 3px rgba(246,192,76,.65), 0 0 2px #fff;
+  }
+  .rail-label{font-size:9px; letter-spacing:.08em; color:var(--text-faint); text-transform:uppercase;}
+  .rail-label.on{color:var(--led);}
+
+  .score-badge{
+    display:inline-flex; gap:8px; align-items:center; margin-top:16px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim);
+    background:var(--panel); border:1px solid var(--trace); padding:8px 14px; border-radius:20px;
+  }
+  .score-badge b{color:var(--gold); font-size:14px;}
+
+  /* ---------- section shell ---------- */
+  section.card{
+    background:var(--panel); border:1px solid var(--trace); border-radius:14px;
+    margin-top:40px; padding:30px clamp(18px,4vw,38px); position:relative; overflow:hidden;
+    scroll-margin-top:70px;
+  }
+  section.card::before{
+    content:attr(data-tag); position:absolute; top:16px; right:20px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em;
+    color:var(--text-faint); text-transform:uppercase;
+  }
+  .sec-head{margin-bottom:22px;}
+  .sec-num{font-family:'JetBrains Mono',monospace; color:var(--copper); font-size:12px; letter-spacing:.2em;}
+  .sec-title{font-size:clamp(22px,3.4vw,30px); font-weight:800; margin:6px 0 8px; text-transform:uppercase; letter-spacing:-.01em;}
+  .sec-desc{color:var(--text-dim); font-size:14.5px; line-height:1.6; max-width:640px;}
+
+  .pill-status{
+    display:inline-block; margin-left:10px; font-family:'JetBrains Mono',monospace; font-size:11px;
+    padding:3px 10px; border-radius:20px; background:var(--led-dim); color:var(--led); vertical-align:middle;
+    opacity:0; transform:translateY(-2px); transition:.3s;
+  }
+  .pill-status.show{opacity:1; transform:none;}
+
+  /* ---------- Sense/Think/Act explainer ---------- */
+  .cycle{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin:26px 0 8px;}
+  .cycle-node{
+    flex:1 1 150px; max-width:190px; background:var(--panel-2); border:1px solid var(--trace); border-radius:12px;
+    padding:20px 16px; text-align:center; cursor:pointer; transition:.25s; position:relative;
+  }
+  .cycle-node:hover{border-color:var(--copper); transform:translateY(-3px);}
+  .cycle-node.active{border-color:var(--led); box-shadow:0 0 0 1px var(--led), 0 0 18px rgba(246,192,76,.25); background:#2e2109;}
+  .cycle-node .ico{font-size:28px; margin-bottom:8px; display:block;}
+  .cycle-node .lbl{font-family:'JetBrains Mono',monospace; font-weight:700; letter-spacing:.1em; font-size:14px;}
+  .cycle-arrow{align-self:center; color:var(--copper); font-size:22px; padding:0 2px;}
+  .cycle-detail{
+    margin-top:20px; background:var(--panel-2); border:1px dashed var(--trace); border-radius:10px;
+    padding:16px 18px; font-size:14px; color:var(--text-dim); line-height:1.6; min-height:26px;
+  }
+  .cycle-detail b{color:var(--led);}
+
+  /* ---------- Sorting game (Sense/Think/Act tag game) ---------- */
+  .scenario{
+    background:var(--panel-2); border:1px solid var(--trace); border-radius:12px; padding:20px 22px; margin-bottom:16px;
+  }
+  .scenario h4{margin:0 0 12px; font-size:15px; color:var(--gold); text-transform:uppercase; letter-spacing:.05em;}
+  .phrase-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+  .phrase-row:last-child{margin-bottom:0;}
+  .phrase-text{flex:1 1 260px; font-size:14.5px; color:var(--text);}
+  .tag-btns{display:flex; gap:6px; flex-wrap:wrap;}
+  .tag-btn{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.06em; padding:6px 12px;
+    border-radius:20px; border:1px solid var(--trace); background:transparent; color:var(--text-dim); cursor:pointer; transition:.2s;
+  }
+  .tag-btn:hover{border-color:var(--copper); color:var(--text);}
+  .tag-btn.correct{background:var(--led-dim); border-color:var(--led); color:var(--led);}
+  .tag-btn.wrong{background:var(--led-red-dim); border-color:var(--led-red); color:var(--led-red);}
+  .tag-btn[disabled]{cursor:default; opacity:.55;}
+
+  /* ---------- IO sorter drag-free game ---------- */
+  .io-board{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px;}
+  @media(max-width:560px){.io-board{grid-template-columns:1fr;}}
+  .io-bin{
+    border:2px dashed var(--trace); border-radius:12px; padding:14px; min-height:150px;
+    background:var(--panel-2);
+  }
+  .io-bin h4{margin:0 0 12px; font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:.15em; text-align:center;}
+  .io-bin.input h4{color:var(--cyan);}
+  .io-bin.output h4{color:var(--gold);}
+  .io-bin .placed{display:flex; flex-wrap:wrap; gap:8px; min-height:20px;}
+  .chip-tray{display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; justify-content:center;}
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:9px 14px; border-radius:8px;
+    background:var(--panel); border:1px solid var(--copper-dim); color:var(--text); cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:.2s; user-select:none;
+  }
+  .chip:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .chip.selected{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold);}
+  .chip.placed-chip{cursor:default; font-size:11.5px; padding:6px 10px;}
+  .chip.placed-chip.correct{background:var(--led-dim); border-color:var(--led); color:var(--led);}
+  .chip.placed-chip.wrong{background:var(--led-red-dim); border-color:var(--led-red); color:var(--led-red);}
+  .io-hint{text-align:center; font-size:12.5px; color:var(--text-faint); margin-top:4px;}
+
+  /* ---------- circuit builder game ---------- */
+  .circuit{
+    display:flex; align-items:center; justify-content:center; gap:0; margin:30px 0 10px; flex-wrap:wrap;
+  }
+  .node-box{
+    background:var(--panel-2); border:1px solid var(--trace); border-radius:12px; padding:18px 20px;
+    text-align:center; min-width:120px;
+  }
+  .node-box .cap{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.15em; color:var(--text-faint); margin-bottom:10px;}
+  #pressBtn{
+    width:64px; height:64px; border-radius:50%; border:3px solid var(--copper);
+    background:radial-gradient(circle at 35% 30%, #3a2a1c, #1c130c); color:var(--copper);
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; cursor:pointer;
+    transition:.08s; box-shadow:0 4px 0 var(--copper-dim);
+  }
+  #pressBtn:active, #pressBtn.pressed{transform:translateY(3px); box-shadow:0 1px 0 var(--copper-dim); background:radial-gradient(circle at 35% 30%, #5a3f24, #2c1f10);}
+  .wire{width:56px; height:3px; background:var(--copper-dim); position:relative; margin:0 -2px;}
+  .wire .pulse{
+    position:absolute; top:-3px; left:-6px; width:10px; height:9px; border-radius:50%;
+    background:var(--gold); box-shadow:0 0 8px 2px var(--gold); opacity:0;
+  }
+  .wire.live{background:var(--gold);}
+  .wire.live .pulse{animation:flow .5s linear;}
+  @keyframes flow{ from{left:-6px; opacity:1;} to{left:52px; opacity:0;} }
+  .esp{
+    width:110px; height:78px; border-radius:8px; background:#0f2119; border:1px solid var(--copper-dim);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; position:relative;
+  }
+  .esp .chip-name{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--copper); letter-spacing:.05em;}
+  .esp .state{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);}
+  .esp.thinking{border-color:var(--gold); box-shadow:0 0 14px rgba(240,184,61,.4);}
+  .led-bulb{
+    width:46px; height:46px; border-radius:50%; margin:0 auto;
+    background:radial-gradient(circle at 35% 30%, #3a2a10, #241a08);
+    border:2px solid var(--copper-dim); transition:.2s;
+  }
+  .led-bulb.lit{
+    background:radial-gradient(circle at 35% 30%, #fff6d9, var(--gold));
+    box-shadow:0 0 22px 6px rgba(240,184,61,.7);
+    border-color:var(--gold);
+  }
+  .code-panel{
+    background:#0d0904; border:1px solid var(--trace); border-radius:10px; padding:16px 18px; margin-top:24px;
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.7; color:#e8c179; overflow-x:auto;
+  }
+  .code-panel .c1{color:var(--text-faint);}
+  .code-panel .kw{color:var(--cyan);}
+  .code-panel .active-line{background:rgba(240,184,61,.12); display:block; margin:0 -18px; padding:0 18px; border-left:2px solid var(--gold);}
+
+  /* ---------- quiz ---------- */
+  .quiz-progress{display:flex; gap:5px; margin-bottom:22px;}
+  .quiz-progress i{flex:1; height:4px; border-radius:3px; background:var(--trace);}
+  .quiz-progress i.done{background:var(--led);}
+  .quiz-progress i.current{background:var(--copper);}
+  .q-text{font-size:18px; font-weight:700; margin-bottom:18px; line-height:1.4;}
+  .opt{
+    display:block; width:100%; text-align:left; background:var(--panel-2); border:1px solid var(--trace);
+    border-radius:10px; padding:14px 16px; margin-bottom:10px; color:var(--text); font-size:14.5px;
+    cursor:pointer; transition:.2s; font-family:'Inter',sans-serif;
+  }
+  .opt:hover{border-color:var(--copper);}
+  .opt.correct{background:var(--led-dim); border-color:var(--led); color:var(--led);}
+  .opt.wrong{background:var(--led-red-dim); border-color:var(--led-red); color:var(--led-red);}
+  .opt[disabled]{cursor:default;}
+  .quiz-nav{display:flex; justify-content:space-between; align-items:center; margin-top:20px;}
+  .btn{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+    background:var(--gold); color:#1a1206; border:none; padding:11px 22px; border-radius:8px; cursor:pointer;
+    font-weight:700; transition:.2s;
+  }
+  .btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .btn.ghost{background:transparent; border:1px solid var(--trace); color:var(--text-dim);}
+  .quiz-result{text-align:center; padding:20px 0;}
+  .quiz-result .big{font-family:'JetBrains Mono',monospace; font-size:44px; font-weight:800; color:var(--gold);}
+  .feedback{font-size:13px; color:var(--text-dim); margin-top:16px; min-height:18px;}
+  .feedback.good{color:var(--led);}
+  .feedback.bad{color:var(--led-red);}
+
+  footer{text-align:center; margin-top:50px; color:var(--text-faint); font-size:12px; font-family:'JetBrains Mono',monospace; letter-spacing:.05em;}
+
+  /* ---------- sequencer game (traffic light) ---------- */
+  .seq-slots{display:flex; gap:10px; margin:22px 0 18px; flex-wrap:wrap; justify-content:center;}
+  .seq-slot{
+    width:150px; min-height:56px; border:2px dashed var(--trace); border-radius:10px;
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:8px 10px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint); transition:.2s;
+  }
+  .seq-slot .num{color:var(--copper); margin-right:6px;}
+  .seq-slot.filled{border-style:solid; border-color:var(--gold); background:var(--panel-2); color:var(--text);}
+  .seq-slot.shake{border-color:var(--led-red); animation:shake .3s;}
+  @keyframes shake{ 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+  .seq-cards{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:6px;}
+  .seq-card{
+    background:var(--panel-2); border:1px solid var(--copper-dim); border-radius:10px; padding:12px 16px;
+    cursor:pointer; font-size:13px; transition:.2s; user-select:none;
+  }
+  .seq-card:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .seq-card.used{opacity:.2; pointer-events:none;}
+
+  /* physical traffic light housing */
+  .tl-scene{display:flex; align-items:center; justify-content:center; gap:36px; margin:28px 0 6px; flex-wrap:wrap;}
+  .tl-housing{
+    width:76px; background:#180f05; border:3px solid var(--copper-dim); border-radius:14px;
+    padding:16px 10px; display:flex; flex-direction:column; gap:14px; align-items:center;
+  }
+  .tl-bulb{width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #2a2010, #170f06); border:2px solid #000; transition:.25s;}
+  .tl-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c2, var(--led-red)); box-shadow:0 0 18px 5px rgba(255,92,92,.65);}
+  .tl-bulb.yellow.on{background:radial-gradient(circle at 35% 30%, #fff2b0, #ffd23d); box-shadow:0 0 18px 5px rgba(255,210,61,.65);}
+  .tl-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 18px 5px rgba(93,255,160,.65);}
+  .tl-info{max-width:220px;}
+  .tl-info .state-line{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--gold); margin-bottom:8px; min-height:18px;}
+  .tl-info .desc-line{font-size:13.5px; color:var(--text-dim); line-height:1.55; min-height:40px;}
+
+  /* pedestrian crossing scene */
+  .px-scene{display:flex; align-items:flex-end; justify-content:center; gap:50px; margin:28px 0 10px; flex-wrap:wrap;}
+  .px-unit{text-align:center;}
+  .px-bulb{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 10px;
+    background:radial-gradient(circle at 35% 30%, #241a08, #150e04); border:2px solid var(--copper-dim); transition:.25s;
+  }
+  .px-bulb.red.on{background:radial-gradient(circle at 35% 30%, #ffc2c2, var(--led-red)); box-shadow:0 0 20px 6px rgba(255,92,92,.6);}
+  .px-bulb.green.on{background:radial-gradient(circle at 35% 30%, #c8ffe0, var(--green-led)); box-shadow:0 0 20px 6px rgba(93,255,160,.6);}
+  .px-label{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em; color:var(--text-faint); text-transform:uppercase;}
+  .px-state-badge{
+    text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--gold);
+    margin-top:4px; letter-spacing:.04em; min-height:18px;
+  }
+
+  /* pin matcher game */
+  .pin-board{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:22px;}
+  @media(max-width:640px){.pin-board{grid-template-columns:1fr;}}
+  .pin-col h4{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.15em; color:var(--text-faint);
+    text-transform:uppercase; margin:0 0 12px;
+  }
+  .pin-list{display:flex; flex-direction:column; gap:8px;}
+  .pin-item{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:11px 14px; border-radius:8px;
+    background:var(--panel-2); border:1px solid var(--copper-dim); cursor:pointer; transition:.2s; color:var(--text);
+  }
+  .pin-item:hover{border-color:var(--gold);}
+  .pin-item.selected{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold);}
+  .pin-item.matched{background:var(--led-dim); border-color:var(--led); color:var(--led); cursor:default; opacity:.8;}
+  .pin-item.flash-wrong{border-color:var(--led-red); background:var(--led-red-dim);}
+  .pin-item.used{opacity:.25; pointer-events:none;}
+
+  /* ---------- sticky tab navigation ---------- */
+  .tabnav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(16,11,4,.94); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--trace); border-radius:0 0 10px 10px;
+  }
+  .tabnav-inner{
+    max-width:1000px; margin:0 auto; display:flex; gap:4px; overflow-x:auto;
+    padding:10px 20px; scrollbar-width:thin; scrollbar-color:var(--copper-dim) transparent;
+  }
+  .tabnav-inner::-webkit-scrollbar{height:5px;}
+  .tabnav-inner::-webkit-scrollbar-thumb{background:var(--copper-dim); border-radius:3px;}
+  .tab-btn{
+    flex:0 0 auto; display:flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-faint); background:transparent; border:1px solid transparent; border-radius:20px;
+    padding:8px 14px; cursor:pointer; transition:.2s; white-space:nowrap;
+  }
+  .tab-btn .dot{width:6px; height:6px; border-radius:50%; background:var(--trace); transition:.2s;}
+  .tab-btn:hover{color:var(--text); border-color:var(--trace);}
+  .tab-btn.active{color:var(--gold); border-color:var(--copper-dim); background:var(--panel-2);}
+  .tab-btn.active .dot{background:var(--gold); box-shadow:0 0 6px 1px rgba(246,192,76,.7);}
+  .tab-btn .dot.on{background:var(--led); box-shadow:0 0 6px 1px rgba(255,216,115,.7);}
+</style>
+</head>
+<body>
+
+<div class="trace-bg"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">// wokwi_lab.py</div>
+    <h1 class="title">Embedded Systems Lab</h1>
+    <p class="subtitle">Sensors, chips, and code that make devices react to the real world. Power up all five stations below to finish the circuit.</p>
+
+    <div class="rail" id="rail">
+      <!-- LEDs injected by JS -->
+    </div>
+    <div class="score-badge">SIGNAL STRENGTH &nbsp;<b id="scoreTotal">0</b>&nbsp;/&nbsp;<span id="scoreMax">8</span></div>
+  </header>
+
+  <nav class="tabnav" id="tabnav">
+    <div class="tabnav-inner" id="tabnavInner"></div>
+  </nav>
+
+  <!-- SECTION 1: Sense-Think-Act explainer -->
+  <section class="card" data-tag="01 / concept" id="sec1">
+    <div class="sec-head">
+      <div class="sec-num">STATION 01</div>
+      <div class="sec-title">The Sense → Think → Act Cycle <span class="pill-status" id="pill1">✓ powered</span></div>
+      <div class="sec-desc">Every embedded system — from a smart thermostat to a robot — runs this loop, over and over. Tap each stage to see it in action.</div>
+    </div>
+
+    <div class="cycle">
+      <div class="cycle-node" data-node="sense">
+        <span class="ico">📡</span><span class="lbl">SENSE</span>
+      </div>
+      <div class="cycle-arrow">→</div>
+      <div class="cycle-node" data-node="think">
+        <span class="ico">🧠</span><span class="lbl">THINK</span>
+      </div>
+      <div class="cycle-arrow">→</div>
+      <div class="cycle-node" data-node="act">
+        <span class="ico">⚙️</span><span class="lbl">ACT</span>
+      </div>
+    </div>
+    <div class="cycle-detail" id="cycleDetail">Tap SENSE, THINK, or ACT above to see what an automatic door does at that stage.</div>
+  </section>
+
+  <!-- SECTION 2: Tag the scenario -->
+  <section class="card" data-tag="02 / game" id="sec2">
+    <div class="sec-head">
+      <div class="sec-num">STATION 02</div>
+      <div class="sec-title">Tag the Cycle <span class="pill-status" id="pill2">✓ powered</span></div>
+      <div class="sec-desc">Each scenario below is split into three moments. Label each one SENSE, THINK, or ACT.</div>
+    </div>
+    <div id="scenarioList"></div>
+    <div class="io-hint" id="tagScore">0 / 0 correct</div>
+  </section>
+
+  <!-- SECTION 3: Input/Output sorter -->
+  <section class="card" data-tag="03 / game" id="sec3">
+    <div class="sec-head">
+      <div class="sec-num">STATION 03</div>
+      <div class="sec-title">GPIO Sorter <span class="pill-status" id="pill3">✓ powered</span></div>
+      <div class="sec-desc">Tap a component below, then tap the bin it belongs in: does the ESP32 <em>receive</em> a signal (INPUT), or <em>send</em> one (OUTPUT)?</div>
+    </div>
+
+    <div class="chip-tray" id="chipTray"></div>
+
+    <div class="io-board">
+      <div class="io-bin input" id="binInput">
+        <h4>◀ INPUT</h4>
+        <div class="placed" id="placedInput"></div>
+      </div>
+      <div class="io-bin output" id="binOutput">
+        <h4>OUTPUT ▶</h4>
+        <div class="placed" id="placedOutput"></div>
+      </div>
+    </div>
+    <div class="io-hint" id="ioScore">0 / 8 sorted</div>
+  </section>
+
+  <!-- SECTION 4: Circuit builder -->
+  <section class="card" data-tag="04 / simulator" id="sec4">
+    <div class="sec-head">
+      <div class="sec-num">STATION 04</div>
+      <div class="sec-title">Button → ESP32 → LED <span class="pill-status" id="pill4">✓ powered</span></div>
+      <div class="sec-desc">Press the button and watch the signal travel through the whole system — from GPIO input, to the ESP32's decision, to a GPIO output.</div>
+    </div>
+
+    <div class="circuit">
+      <div class="node-box">
+        <div class="cap">SENSE</div>
+        <button id="pressBtn">PRESS</button>
+      </div>
+      <div class="wire" id="wire1"><span class="pulse"></span></div>
+      <div class="node-box">
+        <div class="cap">THINK</div>
+        <div class="esp" id="espBox">
+          <div class="chip-name">ESP32</div>
+          <div class="state" id="espState">idle</div>
+        </div>
+      </div>
+      <div class="wire" id="wire2"><span class="pulse"></span></div>
+      <div class="node-box">
+        <div class="cap">ACT</div>
+        <div class="led-bulb" id="ledBulb"></div>
+      </div>
+    </div>
+
+    <div class="code-panel" id="codePanel">
+<span class="c1">01</span> <span class="kw">from</span> machine <span class="kw">import</span> Pin
+<span class="c1">02</span> button = Pin(4, Pin.IN)
+<span class="c1">03</span> led = Pin(2, Pin.OUT)
+<span class="c1">04</span>
+<span class="c1">05</span> <span id="line5">if button.value():</span>
+<span class="c1">06</span>     led.on()
+    </div>
+    <div class="io-hint" id="circuitHint">Press the button at least 3 times to power this station.</div>
+  </section>
+
+  <!-- SECTION 6: Traffic Light Sequencer -->
+  <section class="card" data-tag="06 / game" id="sec6">
+    <div class="sec-head">
+      <div class="sec-num">STATION 06</div>
+      <div class="sec-title">Activity 1 — Sequence the Lights <span class="pill-status" id="pill6">✓ powered</span></div>
+      <div class="sec-desc">A traffic light on GPIO 23 (red), GPIO 22 (yellow), and GPIO 21 (green) repeats one fixed pattern. Click the steps below in the correct order.</div>
+    </div>
+
+    <div class="seq-slots" id="seqSlots"></div>
+    <div class="seq-cards" id="seqCards"></div>
+    <div class="io-hint" id="seqHint">Click the four steps in the order the traffic light actually runs.</div>
+
+    <div class="tl-scene" id="tlScene" style="display:none;">
+      <div class="tl-housing">
+        <div class="tl-bulb red" id="tlRed"></div>
+        <div class="tl-bulb yellow" id="tlYellow"></div>
+        <div class="tl-bulb green" id="tlGreen"></div>
+      </div>
+      <div class="tl-info">
+        <div class="state-line" id="tlState">Ready to run.</div>
+        <div class="desc-line" id="tlDesc">Press play to watch the sequence run on GPIO 23 / 22 / 21, timed with <span class="mono">time.sleep()</span>.</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:16px; display:none;" id="tlPlayWrap">
+      <button class="btn ghost" id="tlPlayBtn">▶ Run the sequence</button>
+    </div>
+  </section>
+
+  <!-- SECTION 7: Pedestrian Crossing Simulator -->
+  <section class="card" data-tag="07 / simulator" id="sec7">
+    <div class="sec-head">
+      <div class="sec-num">STATION 07</div>
+      <div class="sec-title">Activity 2 — Pedestrian Crossing <span class="pill-status" id="pill7">✓ powered</span></div>
+      <div class="sec-desc">Normally, cars can pass. Press the crossing button (GPIO 4) like a pedestrian would, and watch the red car LED (GPIO 15) and green pedestrian LED (GPIO 2) respond.</div>
+    </div>
+
+    <div class="px-scene">
+      <div class="px-unit">
+        <div class="px-bulb red" id="pxRed"></div>
+        <div class="px-label">Cars · GPIO 15</div>
+      </div>
+      <div class="px-unit">
+        <div class="px-bulb green" id="pxGreen"></div>
+        <div class="px-label">Pedestrians · GPIO 2</div>
+      </div>
+    </div>
+    <div class="px-state-badge" id="pxState">Normal state — cars can move.</div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button id="pxBtn" class="btn">🔘 Press crossing button</button>
+    </div>
+    <div class="io-hint" id="pxHint" style="margin-top:14px;">Trigger the crossing at least 3 times to power this station.</div>
+  </section>
+
+  <!-- SECTION 8: GPIO Pin Matcher -->
+  <section class="card" data-tag="08 / game" id="sec8">
+    <div class="sec-head">
+      <div class="sec-num">STATION 08</div>
+      <div class="sec-title">Pin Matcher <span class="pill-status" id="pill8">✓ powered</span></div>
+      <div class="sec-desc">Both activities wire their components to specific GPIO pins. Select a component on the left, then tap the pin it's actually connected to on the right.</div>
+    </div>
+    <div class="pin-board">
+      <div class="pin-col">
+        <h4>Component</h4>
+        <div class="pin-list" id="pinComponents"></div>
+      </div>
+      <div class="pin-col">
+        <h4>GPIO Pin</h4>
+        <div class="pin-list" id="pinTargets"></div>
+      </div>
+    </div>
+    <div class="io-hint" id="pinScore" style="margin-top:14px;">0 / 6 matched</div>
+  </section>
+
+  <!-- SECTION 9: Quiz -->
+  <section class="card" data-tag="09 / final check" id="sec9">
+    <div class="sec-head">
+      <div class="sec-num">STATION 09</div>
+      <div class="sec-title">System Check <span class="pill-status" id="pill9">✓ powered</span></div>
+      <div class="sec-desc">Eight questions. Score 6 or more to fully power the lab.</div>
+    </div>
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div id="quizBody"></div>
+  </section>
+
+  <footer>END OF FILE — embedded_lab.py — GOOD LUCK ⚡</footer>
+</div>
+
+<script>
+/* ======================= GLOBAL SCORE / RAIL ======================= */
+const stations = [
+  {id:1, name:'CYCLE'},
+  {id:2, name:'TAGS'},
+  {id:3, name:'GPIO'},
+  {id:4, name:'CIRCUIT'},
+  {id:6, name:'LIGHTS'},
+  {id:7, name:'CROSSING'},
+  {id:8, name:'PINS'},
+  {id:9, name:'QUIZ'},
+];
+const powered = {1:false,2:false,3:false,4:false,6:false,7:false,8:false,9:false};
+
+function buildRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = stations.map(s => `
+    <div class="rail-led">
+      <div class="bulb" id="bulb${s.id}"></div>
+      <div class="rail-label" id="label${s.id}">${s.name}</div>
+    </div>
+  `).join('');
+}
+buildRail();
+
+function powerStation(id){
+  if(powered[id]) return;
+  powered[id] = true;
+  document.getElementById(`bulb${id}`).classList.add('on');
+  document.getElementById(`label${id}`).classList.add('on');
+  const pill = document.getElementById(`pill${id}`);
+  if(pill) pill.classList.add('show');
+  const tabDot = document.getElementById(`tabdot${id}`);
+  if(tabDot) tabDot.classList.add('on');
+  updateScore();
+}
+function updateScore(){
+  const total = Object.values(powered).filter(Boolean).length;
+  document.getElementById('scoreTotal').textContent = total;
+}
+
+/* ======================= TAB NAVIGATION ======================= */
+function buildTabNav(){
+  const inner = document.getElementById('tabnavInner');
+  inner.innerHTML = stations.map(s => `
+    <button class="tab-btn" id="tab${s.id}" data-target="sec${s.id}">
+      <span class="dot" id="tabdot${s.id}"></span>${s.name}
+    </button>
+  `).join('');
+  inner.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+buildTabNav();
+
+function setActiveTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`tab${id}`);
+  if(btn){
+    btn.classList.add('active');
+    btn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  }
+}
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const id = +entry.target.id.replace('sec','');
+      setActiveTab(id);
+    }
+  });
+}, {rootMargin:'-90px 0px -70% 0px', threshold:0});
+
+stations.forEach(s => {
+  const el = document.getElementById(`sec${s.id}`);
+  if(el) sectionObserver.observe(el);
+});
+
+/* ======================= STATION 1: SENSE-THINK-ACT EXPLAINER ======================= */
+const cycleData = {
+  sense: "The <b>motion sensor</b> at the automatic door detects a person approaching. This is raw information coming IN from the environment — no decision has been made yet.",
+  think: "The <b>controller (microcontroller)</b> checks that signal against its program: \"if motion detected → door should open.\" This is where logic and decisions happen.",
+  act:   "The <b>motor</b> receives the command and physically opens the door. An action happens OUT in the real world — the cycle is complete, and it starts again."
+};
+let cycleSeen = new Set();
+document.querySelectorAll('.cycle-node').forEach(node => {
+  node.addEventListener('click', () => {
+    document.querySelectorAll('.cycle-node').forEach(n => n.classList.remove('active'));
+    node.classList.add('active');
+    const key = node.dataset.node;
+    document.getElementById('cycleDetail').innerHTML = cycleData[key];
+    cycleSeen.add(key);
+    if(cycleSeen.size === 3) powerStation(1);
+  });
+});
+
+/* ======================= STATION 2: TAG THE CYCLE ======================= */
+const scenarios = [
+  {
+    title: "Robot with an obstacle",
+    phrases: [
+      {text:"The distance sensor detects a wall 5cm ahead.", answer:"SENSE"},
+      {text:"The program decides the robot should turn instead of colliding.", answer:"THINK"},
+      {text:"The wheel motors spin to steer the robot away from the wall.", answer:"ACT"},
+    ]
+  },
+  {
+    title: "Smart thermostat",
+    phrases: [
+      {text:"The temperature sensor reads 28°C in the room.", answer:"SENSE"},
+      {text:"The microcontroller compares it to the 22°C target you set.", answer:"THINK"},
+      {text:"The AC unit switches on to cool the room down.", answer:"ACT"},
+    ]
+  },
+  {
+    title: "Traffic light controller",
+    phrases: [
+      {text:"A built-in timer reaches the 30-second mark.", answer:"SENSE"},
+      {text:"The controller's program knows it's time to switch lights.", answer:"THINK"},
+      {text:"The red LED turns off and the green LED turns on.", answer:"ACT"},
+    ]
+  },
+];
+let tagCorrectCount = 0;
+const tagTotal = scenarios.reduce((a,s)=>a+s.phrases.length,0);
+
+function buildScenarios(){
+  const container = document.getElementById('scenarioList');
+  container.innerHTML = scenarios.map((sc, si) => `
+    <div class="scenario">
+      <h4>${sc.title}</h4>
+      ${sc.phrases.map((p, pi) => `
+        <div class="phrase-row">
+          <div class="phrase-text">${p.text}</div>
+          <div class="tag-btns" data-si="${si}" data-pi="${pi}">
+            <button class="tag-btn" data-tag="SENSE">SENSE</button>
+            <button class="tag-btn" data-tag="THINK">THINK</button>
+            <button class="tag-btn" data-tag="ACT">ACT</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.parentElement;
+      const si = +group.dataset.si, pi = +group.dataset.pi;
+      const correctAnswer = scenarios[si].phrases[pi].answer;
+      const chosen = btn.dataset.tag;
+      group.querySelectorAll('.tag-btn').forEach(b => b.disabled = true);
+      if(chosen === correctAnswer){
+        btn.classList.add('correct');
+        tagCorrectCount++;
+      } else {
+        btn.classList.add('wrong');
+        group.querySelectorAll('.tag-btn').forEach(b => {
+          if(b.dataset.tag === correctAnswer) b.classList.add('correct');
+        });
+      }
+      document.getElementById('tagScore').textContent = `${tagCorrectCount} / ${tagTotal} correct`;
+      if(tagCorrectCount >= Math.ceil(tagTotal*0.7)) powerStation(2);
+    });
+  });
+}
+buildScenarios();
+
+/* ======================= STATION 3: GPIO SORTER ======================= */
+const ioItems = [
+  {name:'Push button', type:'INPUT'},
+  {name:'LED', type:'OUTPUT'},
+  {name:'Temperature sensor', type:'INPUT'},
+  {name:'Buzzer', type:'OUTPUT'},
+  {name:'Motion sensor', type:'INPUT'},
+  {name:'Motor', type:'OUTPUT'},
+  {name:'Light sensor', type:'INPUT'},
+  {name:'Display', type:'OUTPUT'},
+];
+let selectedChip = null;
+let ioSortedCount = 0;
+
+function buildChipTray(){
+  const tray = document.getElementById('chipTray');
+  tray.innerHTML = ioItems.map((it, i) => `<div class="chip" data-i="${i}">${it.name}</div>`).join('');
+  tray.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      tray.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedChip = +chip.dataset.i;
+    });
+  });
+}
+buildChipTray();
+
+function tryPlace(binType){
+  if(selectedChip === null) return;
+  const item = ioItems[selectedChip];
+  const chipEl = document.querySelector(`#chipTray .chip[data-i="${selectedChip}"]`);
+  if(!chipEl) return; // already placed
+
+  const placedEl = document.createElement('div');
+  placedEl.className = 'chip placed-chip';
+  const correct = item.type === binType;
+  placedEl.classList.add(correct ? 'correct' : 'wrong');
+  placedEl.textContent = correct ? `✓ ${item.name}` : `✗ ${item.name} → ${item.type}`;
+
+  const targetList = document.getElementById(binType === 'INPUT' ? 'placedInput' : 'placedOutput');
+  targetList.appendChild(placedEl);
+
+  chipEl.remove();
+  ioSortedCount++;
+  selectedChip = null;
+  document.getElementById('ioScore').textContent = `${ioSortedCount} / ${ioItems.length} sorted`;
+  if(ioSortedCount === ioItems.length) powerStation(3);
+}
+document.getElementById('binInput').addEventListener('click', () => tryPlace('INPUT'));
+document.getElementById('binOutput').addEventListener('click', () => tryPlace('OUTPUT'));
+
+/* ======================= STATION 4: CIRCUIT SIMULATOR ======================= */
+let pressCount = 0;
+const pressBtn = document.getElementById('pressBtn');
+const wire1 = document.getElementById('wire1');
+const wire2 = document.getElementById('wire2');
+const espBox = document.getElementById('espBox');
+const espState = document.getElementById('espState');
+const ledBulb = document.getElementById('ledBulb');
+const line5 = document.getElementById('line5');
+
+pressBtn.addEventListener('click', () => {
+  pressBtn.classList.add('pressed');
+  wire1.classList.add('live');
+  espState.textContent = 'reading GPIO4...';
+  line5.classList.add('active-line');
+
+  setTimeout(() => {
+    espBox.classList.add('thinking');
+    espState.textContent = 'button.value() = 1';
+  }, 250);
+
+  setTimeout(() => {
+    wire2.classList.add('live');
+    ledBulb.classList.add('lit');
+    espState.textContent = 'led.on()';
+  }, 550);
+
+  setTimeout(() => {
+    pressBtn.classList.remove('pressed');
+    wire1.classList.remove('live');
+    wire2.classList.remove('live');
+    espBox.classList.remove('thinking');
+    ledBulb.classList.remove('lit');
+    espState.textContent = 'idle';
+    line5.classList.remove('active-line');
+  }, 1300);
+
+  pressCount++;
+  if(pressCount >= 3){
+    document.getElementById('circuitHint').textContent = 'Circuit fully traced — station powered.';
+    powerStation(4);
+  } else {
+    document.getElementById('circuitHint').textContent = `Press the button at least 3 times to power this station. (${pressCount}/3)`;
+  }
+});
+
+/* ======================= STATION 6: TRAFFIC LIGHT SEQUENCER ======================= */
+const seqSteps = [
+  {id:'red', label:'RED → ON', desc:'The red LED (GPIO 23) turns on. Cars stop.'},
+  {id:'green', label:'GREEN → ON', desc:'Red turns off, green LED (GPIO 21) turns on. Cars go.'},
+  {id:'yellow', label:'YELLOW → ON', desc:'Green turns off, yellow LED (GPIO 22) turns on. Caution.'},
+  {id:'repeat', label:'RETURN TO RED', desc:'Yellow turns off, red turns back on. The loop repeats.'},
+];
+let seqShuffled = [];
+let seqPlaced = [];
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i = a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildSeqGame(){
+  seqPlaced = [];
+  seqShuffled = shuffle(seqSteps);
+  document.getElementById('seqSlots').innerHTML = seqSteps.map((_, i) =>
+    `<div class="seq-slot" id="slot${i}"><span class="num">${i+1}.</span><span class="txt">?</span></div>`
+  ).join('');
+  document.getElementById('seqCards').innerHTML = seqShuffled.map(s =>
+    `<div class="seq-card" data-id="${s.id}">${s.label}</div>`
+  ).join('');
+  document.querySelectorAll('#seqCards .seq-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if(card.classList.contains('used')) return;
+      const nextIndex = seqPlaced.length;
+      const slot = document.getElementById(`slot${nextIndex}`);
+      const stepId = card.dataset.id;
+      const expected = seqSteps[nextIndex].id;
+      if(stepId === expected){
+        slot.classList.add('filled');
+        slot.querySelector('.txt').textContent = card.textContent;
+        card.classList.add('used');
+        seqPlaced.push(stepId);
+        if(seqPlaced.length === seqSteps.length){
+          document.getElementById('seqHint').textContent = 'Sequence correct — press play to see it run.';
+          document.getElementById('tlScene').style.display = 'flex';
+          document.getElementById('tlPlayWrap').style.display = 'block';
+          powerStation(6);
+        }
+      } else {
+        slot.classList.add('shake');
+        document.getElementById('seqHint').textContent = 'Not next in the loop — try again.';
+        setTimeout(() => slot.classList.remove('shake'), 300);
+      }
+    });
+  });
+}
+buildSeqGame();
+
+const tlRed = document.getElementById('tlRed');
+const tlYellow = document.getElementById('tlYellow');
+const tlGreen = document.getElementById('tlGreen');
+const tlState = document.getElementById('tlState');
+const tlDesc = document.getElementById('tlDesc');
+
+function tlSetAll(r,y,g){
+  tlRed.classList.toggle('on', r);
+  tlYellow.classList.toggle('on', y);
+  tlGreen.classList.toggle('on', g);
+}
+document.getElementById('tlPlayBtn').addEventListener('click', function(){
+  this.disabled = true;
+  const seq = [
+    {r:true,y:false,g:false, label:'red.on()', desc:'RED is on — cars stop.', wait:900},
+    {r:false,y:false,g:false, label:'red.off()', desc:'Red turns off before the next light.', wait:200},
+    {r:false,y:false,g:true, label:'green.on()', desc:'GREEN is on — cars go.', wait:900},
+    {r:false,y:false,g:false, label:'green.off()', desc:'Green turns off before the next light.', wait:200},
+    {r:false,y:true,g:false, label:'yellow.on()', desc:'YELLOW is on — caution.', wait:700},
+    {r:false,y:false,g:false, label:'yellow.off()', desc:'Loop complete — back to red.', wait:200},
+  ];
+  let i = 0;
+  const btn = this;
+  function step(){
+    if(i >= seq.length){ btn.disabled = false; tlState.textContent = 'Done — press play to run it again.'; return; }
+    const s = seq[i];
+    tlSetAll(s.r, s.y, s.g);
+    tlState.textContent = s.label;
+    tlDesc.textContent = s.desc;
+    i++;
+    setTimeout(step, s.wait);
+  }
+  step();
+});
+
+/* ======================= STATION 7: PEDESTRIAN CROSSING SIMULATOR ======================= */
+let pxCount = 0;
+const pxRed = document.getElementById('pxRed');
+const pxGreen = document.getElementById('pxGreen');
+const pxState = document.getElementById('pxState');
+const pxBtn = document.getElementById('pxBtn');
+let pxBusy = false;
+
+pxBtn.addEventListener('click', () => {
+  if(pxBusy) return;
+  pxBusy = true;
+  pxBtn.disabled = true;
+  pxState.textContent = 'Button pressed — ESP32 reading GPIO 4...';
+
+  setTimeout(() => {
+    pxRed.classList.add('on');
+    pxGreen.classList.add('on');
+    pxState.textContent = 'Cars stop. Pedestrians can walk.';
+  }, 350);
+
+  setTimeout(() => {
+    pxState.textContent = 'Holding state — time.sleep() running...';
+  }, 1400);
+
+  setTimeout(() => {
+    pxRed.classList.remove('on');
+    pxGreen.classList.remove('on');
+    pxState.textContent = 'Normal state — cars can move.';
+    pxBtn.disabled = false;
+    pxBusy = false;
+  }, 2600);
+
+  pxCount++;
+  if(pxCount >= 3){
+    document.getElementById('pxHint').textContent = 'Crossing logic confirmed — station powered.';
+    powerStation(7);
+  } else {
+    document.getElementById('pxHint').textContent = `Trigger the crossing at least 3 times to power this station. (${pxCount}/3)`;
+  }
+});
+
+/* ======================= STATION 8: GPIO PIN MATCHER ======================= */
+const pinPairs = [
+  {id:0, label:'Activity 1 — Red LED', pin:'GPIO 23'},
+  {id:1, label:'Activity 1 — Yellow LED', pin:'GPIO 22'},
+  {id:2, label:'Activity 1 — Green LED', pin:'GPIO 21'},
+  {id:3, label:'Activity 2 — Red LED (cars)', pin:'GPIO 15'},
+  {id:4, label:'Activity 2 — Green LED (pedestrians)', pin:'GPIO 2'},
+  {id:5, label:'Activity 2 — Push button', pin:'GPIO 4'},
+];
+let pinSelected = null;
+let pinMatchedCount = 0;
+
+function buildPinMatcher(){
+  const compCol = document.getElementById('pinComponents');
+  const targetCol = document.getElementById('pinTargets');
+  compCol.innerHTML = pinPairs.map(p => `<div class="pin-item" data-id="${p.id}">${p.label}</div>`).join('');
+  const shuffledPins = shuffle(pinPairs);
+  targetCol.innerHTML = shuffledPins.map(p => `<div class="pin-item" data-id="${p.id}">${p.pin}</div>`).join('');
+
+  compCol.querySelectorAll('.pin-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if(el.classList.contains('matched')) return;
+      compCol.querySelectorAll('.pin-item').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      pinSelected = +el.dataset.id;
+    });
+  });
+  targetCol.querySelectorAll('.pin-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if(pinSelected === null || el.classList.contains('matched')) return;
+      const compEl = compCol.querySelector(`.pin-item[data-id="${pinSelected}"]`);
+      if(+el.dataset.id === pinSelected){
+        el.classList.add('matched');
+        compEl.classList.add('matched');
+        pinSelected = null;
+        pinMatchedCount++;
+        document.getElementById('pinScore').textContent = `${pinMatchedCount} / ${pinPairs.length} matched`;
+        if(pinMatchedCount === pinPairs.length) powerStation(8);
+      } else {
+        el.classList.add('flash-wrong');
+        setTimeout(() => el.classList.remove('flash-wrong'), 400);
+      }
+    });
+  });
+}
+buildPinMatcher();
+
+/* ======================= STATION 9: QUIZ ======================= */
+const quizQuestions = [
+  {
+    q: "What is an embedded system?",
+    opts: ["A general-purpose computer like a laptop", "A computer built into a device to perform a specific function", "A type of internet connection", "A programming language"],
+    correct: 1
+  },
+  {
+    q: "What does a sensor provide to an embedded system?",
+    opts: ["Output", "Power", "Input", "Storage"],
+    correct: 2
+  },
+  {
+    q: "What does GPIO stand for?",
+    opts: ["Global Processor Input Output", "General Purpose Input/Output", "Graphics Processing Input Output", "General Program Instruction Order"],
+    correct: 1
+  },
+  {
+    q: "A robot detects an obstacle and stops its motor. Which sequence does this represent?",
+    opts: ["Act → Think → Sense", "Think → Act → Sense", "Sense → Think → Act", "Act → Sense → Think"],
+    correct: 2
+  },
+  {
+    q: "Button → ESP32 → LED. Which statement is correct?",
+    opts: ["The LED provides input and the button is the output", "The button provides input, and the LED is controlled as an output", "Both the button and LED are inputs", "The ESP32 is an output device"],
+    correct: 1
+  },
+  {
+    q: "Why would you use Wokwi before building a circuit with real hardware?",
+    opts: ["It's the only way to write Python", "It lets you test the circuit safely with no risk of damaging components", "It automatically orders parts for you", "It replaces the need for a microcontroller"],
+    correct: 1
+  },
+  {
+    q: "In the traffic light activity, what comes right after GREEN in the sequence?",
+    opts: ["RED", "YELLOW", "The sequence ends", "GREEN turns on a second time"],
+    correct: 1
+  },
+  {
+    q: "In the pedestrian crossing activity, what is used to create the waiting time after the button is pressed?",
+    opts: ["Pin.OUT", "machine.reset()", "time.sleep()", "Pin.IN"],
+    correct: 2
+  },
+];
+
+let qIndex = 0;
+let qScore = 0;
+const quizBody = document.getElementById('quizBody');
+const quizProgress = document.getElementById('quizProgress');
+
+function buildProgress(){
+  quizProgress.innerHTML = quizQuestions.map((_, i) =>
+    `<i id="prog${i}" class="${i===0 ? 'current':''}"></i>`
+  ).join('');
+}
+buildProgress();
+
+function renderQuestion(){
+  const item = quizQuestions[qIndex];
+  quizBody.innerHTML = `
+    <div class="q-text">${qIndex+1}. ${item.q}</div>
+    <div id="optsWrap">
+      ${item.opts.map((o,i) => `<button class="opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-nav">
+      <span class="io-hint">Question ${qIndex+1} of ${quizQuestions.length}</span>
+      <button class="btn" id="nextBtn" style="display:none;">${qIndex === quizQuestions.length-1 ? 'See results' : 'Next'}</button>
+    </div>
+  `;
+  document.querySelectorAll('#optsWrap .opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chosen = +btn.dataset.i;
+      document.querySelectorAll('#optsWrap .opt').forEach(b => b.disabled = true);
+      const fb = document.getElementById('feedback');
+      if(chosen === item.correct){
+        btn.classList.add('correct');
+        fb.textContent = 'Correct.';
+        fb.className = 'feedback good';
+        qScore++;
+      } else {
+        btn.classList.add('wrong');
+        document.querySelectorAll('#optsWrap .opt')[item.correct].classList.add('correct');
+        fb.textContent = 'Not quite — correct answer highlighted.';
+        fb.className = 'feedback bad';
+      }
+      document.getElementById(`prog${qIndex}`).classList.add('done');
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    });
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    qIndex++;
+    if(qIndex < quizQuestions.length){
+      document.getElementById(`prog${qIndex}`).classList.add('current');
+      renderQuestion();
+    } else {
+      renderResult();
+    }
+  });
+}
+
+function renderResult(){
+  quizBody.innerHTML = `
+    <div class="quiz-result">
+      <div class="big">${qScore} / ${quizQuestions.length}</div>
+      <p style="color:var(--text-dim); margin-top:10px;">${
+        qScore >= 6 ? "Full power — you've got embedded systems down." :
+        qScore >= 4 ? 'Solid signal. Review the stations above and try again.' :
+        'Weak signal — revisit the sections above and retake the check.'
+      }</p>
+      <button class="btn ghost" id="retryBtn" style="margin-top:16px;">Retry quiz</button>
+    </div>
+  `;
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    qIndex = 0; qScore = 0;
+    buildProgress();
+    renderQuestion();
+  });
+  if(qScore >= 6) powerStation(9);
+}
+renderQuestion();
+
+updateScore();
+</script>
+</body>
+</html>
